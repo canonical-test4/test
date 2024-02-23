@@ -1,0 +1,8 @@
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: [self-hosted, data-platform, ubuntu, ARM64, 4cpu16ram]
+    steps:
+      - run: echo 'Hello, world!'
