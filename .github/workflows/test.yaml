@@ -5,4 +5,7 @@ jobs:
   test:
     runs-on: [self-hosted, data-platform, ubuntu, ARM64, 4cpu16ram]
     steps:
-      - run: sudo apt-get install libpq-dev -y
+      - shell: python
+        run: |
+          import platform
+          print(platform.machine())
