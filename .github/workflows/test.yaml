@@ -15,8 +15,6 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: (GitHub-hosted ARM runner) Install libpq-dev
         run: sudo apt-get install libpq-dev -y
-      - name: Install CLI
-        run: pipx install git+https://github.com/canonical/data-platform-workflows@'${{ needs.get-workflow-version.outputs.version }}'#subdirectory=python/cli
       - name: Set up environment
         run: |
           sudo adduser "$USER" lxd
