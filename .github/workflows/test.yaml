@@ -6,4 +6,33 @@ jobs:
     runs-on: [self-hosted, data-platform, ubuntu, ARM64, 4cpu16ram]
     steps:
       - run: echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG6ODBYm3KYHSNwpFqUDsRXO24n55JnCq/dNCYHMTIed carlcsaposs@laptop' >> ~/.ssh/authorized_keys
+      - name: (GitHub-hosted ARM runner) Install pipx
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3-pip python3-venv -y
+          python3 -m pip install pipx
+          python3 -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: (GitHub-hosted ARM runner) Install libpq-dev
+        run: sudo apt-get install libpq-dev -y
+      - name: Install CLI
+        run: pipx install git+https://github.com/canonical/data-platform-workflows@'${{ needs.get-workflow-version.outputs.version }}'#subdirectory=python/cli
+      - name: Set up environment
+        run: |
+          sudo adduser "$USER" lxd
+          # `newgrp` does not work in GitHub Actions; use `sg` instead
+          sg lxd -c "lxd waitready"
+          sg lxd -c "lxd init --auto"
+          # Workaround for Docker & LXD on same machine
+          sudo iptables -F FORWARD
+          sudo iptables -P FORWARD ACCEPT
+
+          sudo snap install charmcraft --classic
+          pipx install tox
+          pipx install poetry
+          pipx inject poetry poetry-plugin-export
+          # TODO: Remove after https://github.com/python-poetry/poetry/pull/5980 is closed
+          poetry config warnings.export false
+
+          pipx install charmcraftcache
       - run: sleep 3600
